@@ -43,14 +43,14 @@ dirPath = pjoin(args.out_dir, 'saved_temporal_models/')
 makedirs_catchExep(dirPath)
 
 if dataset == "test" or dataset == "AP_news":
-    dirModelName = "model_test_" + "_".join([str(dataset), str(batch_size), str(model_version), str(dim_word), str(dim_model)])
+    dirModelName = "model_" + "_".join([str(dataset), str(batch_size), str(model_version), str(dim_word), str(dim_model)])
 else:
     sys.exit("Wrong dataset")
 
-dirPath = pjoin(dirPath, dirModelName)
-makedirs_catchExep(dirPath)
+dirModelPath = pjoin(dirPath, dirModelName)
+makedirs_catchExep(dirModelPath)
 
-modelName = os.path.join(dirPath, dirModelName + ".npz")
+modelName = os.path.join(dirModelPath, dirModelName + ".npz")
 
 ###################################################################################
 
@@ -88,3 +88,22 @@ trainerr, validerr, testerr = train(saveto=modelName,
                                     validsetPath=validsetPath,
                                     testsetPath=testsetPath,
                                     clip_c=1.)
+
+
+# Prepare result line to append to result file
+line = "\t".join([str(dirModelName), str(dataset), str(batch_size), str(model_version), str(dim_word), str(dim_model), str(np.exp(trainerr)), str(np.exp(validerr)), str(np.exp(testerr))]) + "\n"
+
+# Preparing result file
+results_file = dirPath + 'results.txt'
+if not os.path.exists(results_file):
+    # Create result file if doesn't exist
+    header_line = "\t".join(['dirModelName', 'dataset', 'batch_size', 'model_version', 'dim_word', 'dim_model',
+                             'train_perplexity', 'valid_perplexity', 'test_perplexity']) + '\n'
+    f = open(results_file, 'w')
+    f.write(header_line)
+    f.close()
+
+f = open(results_file, "a")
+fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+f.write(line)
+f.close()  # unlocks the file
