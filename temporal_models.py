@@ -432,11 +432,13 @@ def pred_probs(f_log_probs, options, iterator, verbose=False):
     probs = []
 
     n_done = 0
-
+    total_count = 0
     for x_raw in iterator:
         n_done += len(x_raw)
 
         x, x_mask = prepare_data(x_raw)
+
+        total_count += x_mask.sum()
 
         if x is None:
             continue
@@ -448,7 +450,7 @@ def pred_probs(f_log_probs, options, iterator, verbose=False):
         if verbose:
             print >> sys.stderr, '%d samples computed' % (n_done)
 
-    return numpy.array(probs)
+    return numpy.array(probs).sum()/total_count
 
 
 # optimizers
@@ -715,9 +717,9 @@ def train(dim_word=100,  # word vector dimensionality
         test_err = 0
 
         if valid is not None:
-            valid_err = pred_probs(f_log_probs, model_options, valid).mean()
+            valid_err = pred_probs(f_log_probs, model_options, valid)  # .mean()
         if test is not None:
-            test_err = pred_probs(f_log_probs, model_options, test).mean()
+            test_err = pred_probs(f_log_probs, model_options, test)  # .mean()
 
         history_errs.append([valid_err, test_err])
         print 'Train ', train_err, 'Valid ', valid_err, 'Test ', test_err
@@ -745,9 +747,9 @@ def train(dim_word=100,  # word vector dimensionality
     test_err = 0
     # train_err = pred_error(f_pred, prepare_data, train, kf)
     if valid is not None:
-        valid_err = pred_probs(f_log_probs, model_options, valid).mean()
+        valid_err = pred_probs(f_log_probs, model_options, valid)  # .mean()
     if test is not None:
-        test_err = pred_probs(f_log_probs, model_options, test).mean()
+        test_err = pred_probs(f_log_probs, model_options, test)  # .mean()
 
     print 'Train ', train_err, 'Valid ', valid_err, 'Test ', test_err
 

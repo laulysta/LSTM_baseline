@@ -44,10 +44,16 @@ def prepare_data(x_list):
         if length_max < ex_length:
             length_max = ex_length
 
-    x = np.zeros([length_max + 1, len(x_list)], dtype=np.int64)
+    # x = np.zeros([length_max + 1, len(x_list)], dtype=np.int64)
+    # x_mask = np.zeros_like(x, dtype=np.float32)
+    # for i, example in enumerate(x_list):
+    #     x[0:example.shape[0], i] = example
+    #     x_mask[0:example.shape[0] + 1, i] = np.ones([example.shape[0] + 1], dtype=np.int32)
+
+    x = np.zeros([length_max, len(x_list)], dtype=np.int64)
     x_mask = np.zeros_like(x, dtype=np.float32)
     for i, example in enumerate(x_list):
         x[0:example.shape[0], i] = example
-        x_mask[0:example.shape[0] + 1, i] = np.ones([example.shape[0] + 1], dtype=np.int32)
+        x_mask[0:example.shape[0], i] = np.ones([example.shape[0]], dtype=np.int32)
 
     return x, x_mask
