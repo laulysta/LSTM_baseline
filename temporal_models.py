@@ -406,6 +406,9 @@ def build_model(tparams, options):
     #
 
     emb = tparams['Wemb'][x.flatten()].reshape([n_timesteps, n_samples, options['dim_word']])
+    emb_shifted = tensor.zeros_like(emb)
+    emb_shifted = tensor.set_subtensor(emb_shifted[1:], emb[:-1])
+    emb = emb_shifted
     proj = get_layer(options['model_version'])[1](tparams, emb, options,
                                                   prefix=options['model_version'],
                                                   mask=x_mask,
