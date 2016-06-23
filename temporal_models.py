@@ -271,7 +271,7 @@ def gru_layer(tparams, state_below, options, prefix='gru', mask=None, one_step=F
     state_below_ = tensor.dot(state_below, tparams[_p(prefix, 'W')]) + tparams[_p(prefix, 'b')]
     state_belowx = tensor.dot(state_below, tparams[_p(prefix, 'Wx')]) + tparams[_p(prefix, 'bx')]
 
-    def _step_slice(m_, x_, xx_, h_, U, Ux):
+    def _step(m_, x_, xx_, h_, U, Ux):
         preact = tensor.dot(h_, U)
         preact += x_
 
@@ -290,7 +290,6 @@ def gru_layer(tparams, state_below, options, prefix='gru', mask=None, one_step=F
         return h  # , r, u, preact, preactx
 
     seqs = [mask, state_below_, state_belowx]
-    _step = _step_slice
 
     shared_vars = [tparams[_p(prefix, 'U')],
                    tparams[_p(prefix, 'Ux')]]
@@ -300,7 +299,7 @@ def gru_layer(tparams, state_below, options, prefix='gru', mask=None, one_step=F
     else:
         rval, updates = theano.scan(_step,
                                     sequences=seqs,
-                                    outputs_info=[tensor.alloc(0., n_samples, dim)],
+                                    outputs_info=[init_state],
                                     non_sequences=shared_vars,
                                     name=_p(prefix, '_layers'),
                                     n_steps=nsteps,
@@ -336,7 +335,7 @@ def lstm_layer(tparams, state_below, options, prefix='lstm', mask=None, **kwargs
 
     dim = tparams[_p(prefix, 'U')].shape[0]
 
-    if mask == None:
+    if mask is None:
         mask = tensor.alloc(1., state_below.shape[0], 1)
 
     def _slice(_x, n, dim):
@@ -372,6 +371,7 @@ def lstm_layer(tparams, state_below, options, prefix='lstm', mask=None, **kwargs
                                 name=_p(prefix, '_layers'),
                                 n_steps=nsteps,
                                 profile=profile)
+
     return rval
 
 
