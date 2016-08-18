@@ -314,22 +314,6 @@ def param_init_lstm(options, params, prefix='lstm', nin=None, dim=None, hiero=Fa
     W = numpy.concatenate([norm_weight(nin, dim),
                            norm_weight(nin, dim),
                            norm_weight(nin, dim),
-                           numpy.ones((nin, dim)).astype('float32')], axis=1)
-    params[_p(prefix, 'W')] = W
-    U = numpy.concatenate([ortho_weight(dim),
-                           ortho_weight(dim),
-                           ortho_weight(dim),
-                           numpy.ones((dim, dim)).astype('float32')], axis=1)
-    params[_p(prefix, 'U')] = U
-    params[_p(prefix, 'b')] = numpy.zeros((4 * dim,)).astype('float32')
-
-    return params
-
-
-def old_param_init_lstm(options, params, prefix='lstm', nin=None, dim=None, hiero=False):
-    W = numpy.concatenate([norm_weight(nin, dim),
-                           norm_weight(nin, dim),
-                           norm_weight(nin, dim),
                            norm_weight(nin, dim)], axis=1)
     params[_p(prefix, 'W')] = W
     U = numpy.concatenate([ortho_weight(dim),
@@ -337,7 +321,9 @@ def old_param_init_lstm(options, params, prefix='lstm', nin=None, dim=None, hier
                            ortho_weight(dim),
                            ortho_weight(dim)], axis=1)
     params[_p(prefix, 'U')] = U
-    params[_p(prefix, 'b')] = numpy.zeros((4 * dim,)).astype('float32')
+    bias_b = numpy.zeros((4 * dim,)).astype('float32')
+    bias_b[dim * 3:dim * 4] = 1.0
+    params[_p(prefix, 'b')] = bias_b
 
     return params
 
